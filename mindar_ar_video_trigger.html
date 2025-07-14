@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Space Invader AR Multi-Target</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Video Elements -->
+    <video 
+      id="video1" 
+      src="SpaceInvaderVol7_flyer.mov" 
+      playsinline 
+      webkit-playsinline 
+      preload="auto" 
+      crossorigin="anonymous">
+    </video>
+
+    <video 
+      id="video2" 
+      src="a_2025-05-28T04-00-22_melt_and_morph.mp4" 
+      playsinline 
+      webkit-playsinline 
+      preload="auto" 
+      crossorigin="anonymous">
+    </video>
+
+    <!-- AR Scene -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: true; uiLoading: true;" 
+             embedded 
+             color-space="sRGB"
+             renderer="colorManagement: true, physicallyCorrectLights"
+             vr-mode-ui="enabled: false"
+             device-orientation-permission-ui="enabled: true">
+
+      <a-assets></a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Target 0 -->
+      <a-entity mindar-image-target="targetIndex: 0" play-on-target="video: #video1; videoPlane: #videoPlane1">
+        <a-video
+          id="videoPlane1"
+          src="#video1"
+          width="1"
+          height="1.78"
+          position="0 0 0"
+          rotation="0 0 0"
+          autoplay="false"
+          loop="false"
+          visible="false">
+        </a-video>
+      </a-entity>
+
+      <!-- Target 1 -->
+      <a-entity mindar-image-target="targetIndex: 1" play-on-target="video: #video2; videoPlane: #videoPlane2">
+        <a-video
+          id="videoPlane2"
+          src="#video2"
+          width="1"
+          height="1.78"
+          position="0 0 0"
+          rotation="0 0 0"
+          autoplay="false"
+          loop="false"
+          visible="false">
+        </a-video>
+      </a-entity>
+
+    </a-scene>
+
+    <!-- JavaScript Component -->
+    <script>
+      AFRAME.registerComponent('play-on-target', {
+        schema: {
+          video: { type: 'selector' },
+          videoPlane: { type: 'selector' }
+        },
+        init: function () {
+          const videoEl = this.data.video;
+          const videoPlane = this.data.videoPlane;
+          const target = this.el;
+
+          target.addEventListener("targetFound", () => {
+            videoEl.play().then(() => {
+              videoPlane.setAttribute("visible", "true");
+            }).catch((e) => {
+              console.warn("Browser blocked autoplay with sound. Tap required:", e);
+            });
+          });
+
+          target.addEventListener("targetLost", () => {
+            videoEl.pause();
+            videoPlane.setAttribute("visible", "false");
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
